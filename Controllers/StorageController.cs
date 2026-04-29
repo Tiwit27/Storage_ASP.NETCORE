@@ -15,7 +15,25 @@ public class StorageController: ControllerBase
     }
     
     [HttpGet]
-    public IActionResult GetFiles(string path = null)
+    public IActionResult GetEntries(string? path)
+    {
+        try
+        {
+            var files = _service.GetEntries(path);
+            return Ok(files);
+        }
+        catch (ForbiddenException e)
+        {
+            return StatusCode(403, e.Message);
+        }
+        catch (FileNotFoundException e)
+        {
+            return NotFound(e.Message);
+        }
+    }
+
+    [HttpGet]
+    public IActionResult GetFiles(string? path)
     {
         try
         {
