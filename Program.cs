@@ -1,3 +1,5 @@
+using Storage.Interfaces;
+using Storage.Options;
 using Storage.Services;
 
 namespace Storage;
@@ -16,6 +18,8 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddScoped<StorageService>();
+        builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
+        builder.Services.AddSingleton<IStoragePathProvider, StoragePathProvider>();
 
         var app = builder.Build();
 

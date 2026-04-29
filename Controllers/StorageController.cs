@@ -31,13 +31,12 @@ public class StorageController: ControllerBase
             return NotFound(e.Message);
         }
     }
-
-    [HttpGet]
-    public IActionResult GetFiles(string? path)
+    [HttpPost]
+    public async Task<IActionResult> UploadFile(IFormFile file,string? path)
     {
         try
         {
-            var files = _service.GetFiles(path);
+            var files = await _service.UploadFile(file, path);
             return Ok(files);
         }
         catch (ForbiddenException e)
