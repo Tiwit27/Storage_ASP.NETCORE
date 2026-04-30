@@ -33,16 +33,28 @@ public class StorageService
             });
     }
 
-    public async Task<bool> UploadFile(IFormFile file, string? path)
+    public async Task<string> UploadFile(IFormFile file, string? path)
     {
-        var fullPath = _pathProvider.GetFullPath(path);
-        if (!Directory.Exists(fullPath))
+        try
         {
-            throw new FileNotFoundException("Directory not found");
+            if (file.Length > 20971520) //20MB max
+            {
+                Console.WriteLine("Error");
+                throw new FileSizeLimitException("File is too large");
+            }
+            var fullPath = _pathProvider.GetFullPath(path);
+            if (!Directory.Exists(fullPath))
+            {
+                throw new FileNotFoundException("Directory not found");
+            }
+            fullPath = Path.Combine(fullPath,Path.GetFileName(file.FileName));
+            await using var stream = new FileStream(fullPath, FileMode.Create);
+            await file.CopyToAsync(stream);
+            return fullPath;
         }
-        var safeName = Path.GetFileName(file.FileName);
-        using var stream = new FileStream(Path.Combine(fullPath, safeName), FileMode.Create);
-        await file.CopyToAsync(stream);
-        return true;
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
     }
 }

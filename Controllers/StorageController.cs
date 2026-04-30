@@ -36,8 +36,8 @@ public class StorageController: ControllerBase
     {
         try
         {
-            var files = await _service.UploadFile(file, path);
-            return Ok(files);
+            var filePath = await _service.UploadFile(file, path);
+            return NoContent();
         }
         catch (ForbiddenException e)
         {
@@ -46,6 +46,10 @@ public class StorageController: ControllerBase
         catch (FileNotFoundException e)
         {
             return NotFound(e.Message);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
         }
     }
 }
