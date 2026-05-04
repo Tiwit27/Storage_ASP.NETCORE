@@ -39,7 +39,6 @@ public class StorageService
         {
             if (file.Length > 20971520) //20MB max
             {
-                Console.WriteLine("Error");
                 throw new FileSizeLimitException("File is too large");
             }
             var fullPath = _pathProvider.GetFullPath(path);
@@ -51,6 +50,59 @@ public class StorageService
             await using var stream = new FileStream(fullPath, FileMode.Create);
             await file.CopyToAsync(stream);
             return fullPath;
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
+
+    public void RemoveEntry(string? path, string fileName)
+    {
+        try
+        {
+            var fullPath = _pathProvider.GetFullPath(path);
+            if (!Directory.Exists(fullPath))
+            {
+                throw new FileNotFoundException("Directory not found");
+            }
+            fullPath = Path.Combine(fullPath,Path.GetFileName(fileName));
+            if(!File.Exists(fullPath) && !Directory.Exists(fullPath))
+            {
+                throw new FileNotFoundException("File or Directory not found");
+            }
+
+            if (File.GetAttributes(fullPath).HasFlag(FileAttributes.Directory))
+            {
+                Directory.Delete(fullPath, true);
+            }
+            else
+            {
+                File.Delete(fullPath);
+            }
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
+
+    public async Task<string> GetFile(string? path, string fileName)
+    {
+        try
+        {
+            var fullPath = _pathProvider.GetFullPath(path);
+            if (!Directory.Exists(fullPath))
+            {
+                throw new FileNotFoundException("Directory not found");
+            }
+            fullPath = Path.Combine(fullPath,Path.GetFileName(fileName));
+            if(!File.Exists(fullPath))
+            {
+                throw new FileNotFoundException("File not found");
+            }
+            string result = await File.ReadAllTextAsync(fullPath);
+            return result;
         }
         catch (Exception e)
         {

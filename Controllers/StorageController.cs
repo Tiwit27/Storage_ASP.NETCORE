@@ -52,4 +52,47 @@ public class StorageController: ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+    [HttpDelete]
+    public IActionResult RemoveFile(string? path, string fileName)
+    {
+        try
+        {
+            _service.RemoveEntry(path, fileName);
+            return NoContent();
+        }
+        catch (ForbiddenException e)
+        {
+            return StatusCode(403, e.Message);
+        }
+        catch (FileNotFoundException e)
+        {
+            return NotFound(e.Message);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+    
+    [HttpGet("{fileName}")]
+    public async Task<IActionResult> GetFile([FromQuery] string? path, string fileName)
+    {
+        try
+        {
+            var result = await _service.GetFile(path, fileName);
+            return Ok(result);
+        }
+        catch (ForbiddenException e)
+        {
+            return StatusCode(403, e.Message);
+        }
+        catch (FileNotFoundException e)
+        {
+            return NotFound(e.Message);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
 }
